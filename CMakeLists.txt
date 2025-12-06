@@ -10,7 +10,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
-set(CMAKE_PROJECT_NAME ord32) # 设置工程名宏。
+set(CMAKE_PROJECT_NAME ordmcu) # 设置工程名宏。
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE) # 在构建过程中生成一个名为 `compile_commands.json` 的文件，这个文件记录了每个源文件（如 `.c`, `.cpp`）的完整编译命令（包括编译器路径、宏定义、包含路径、编译选项等）。
 

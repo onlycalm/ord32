@@ -31,6 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+static GPIO_InitTypeDef  GPIO_InitStruct;
 
 /* USER CODE END PD */
 
@@ -53,6 +54,20 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+// 粗略的ms延时（受优化和时钟影响大）
+void Software_DelayMs(uint32_t ms)
+{
+// 内层循环需要根据实际时钟频率校准
+#define LOOPS_PER_MS 7200 // 72MHz下的大概值
+
+    for(uint32_t i = 0; i < ms; i++)
+    {
+        for(uint32_t j = 0; j < LOOPS_PER_MS; j++)
+        {
+            __asm__("nop"); // 空操作，防止被优化
+        }
+    }
+}
 
 /* USER CODE END 0 */
 
@@ -85,6 +100,25 @@ int main(void)
 
   /* Initialize all configured peripherals */
   /* USER CODE BEGIN 2 */
+  /* Enable GPIO Clock. */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOE_CLK_ENABLE();
+
+  /* Configure IO in output push-pull mode to drive external LEDs */
+  GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull  = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Mode  = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull  = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* USER CODE END 2 */
 
@@ -93,6 +127,12 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+    if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_SET)
+    {
+      HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_5);
+      HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_5);
+      Software_DelayMs(100);
+    }
 
     /* USER CODE BEGIN 3 */
   }
